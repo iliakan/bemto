@@ -1,8 +1,249 @@
+// JUST MANUALLY INCLUDE FILES
+// NO CHANGES
+
 //- bemto
 //- Copyright(c) 2012 Roman Komarov <kizu@kizu.ru>
 //- MIT Licensed
 
-include helpers.pug
-include settings.pug
+-
+  // Cloning via http://stackoverflow.com/a/728694/885556
+  var clone = function(obj) {
+      var copy;
+
+      // Handle the 3 simple types, and null or undefined
+      if (null == obj || "object" != typeof obj) return obj;
+
+      // Handle Date
+      if (obj instanceof Date) {
+          copy = new Date();
+          copy.setTime(obj.getTime());
+          return copy;
+      }
+
+      // Handle Array
+      if (obj instanceof Array) {
+          copy = [];
+          for (var i = 0, len = obj.length; i < len; i++) {
+              copy[i] = clone(obj[i]);
+          }
+          return copy;
+      }
+
+      // Handle Object
+      if (obj instanceof Object) {
+          copy = {};
+          for (var attr in obj) {
+              if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+          }
+          return copy;
+      }
+
+      throw new Error("Unable to copy obj! Its type isn't supported.");
+  }
+
+// include settings.pug
+
+//- bemto
+//- Copyright(c) 2012 Roman Komarov <kizu@kizu.ru>
+//- MIT Licensed
+
+// include tag_metadata.pug
+
+//- bemto
+//- Copyright(c) 2012 Roman Komarov <kizu@kizu.ru>
+//- MIT Licensed
+
+-
+  var get_bemto_tag_type = function(tagName) {
+    var result = 'block'
+    if (bemto_tag_metadata[tagName]) {
+      result = bemto_tag_metadata[tagName].type || result;
+    }
+    return result;
+  }
+
+  var get_bemto_tag_content_type = function(tagName) {
+    var result = 'block'
+    if (bemto_tag_metadata[tagName]) {
+      result = bemto_tag_metadata[tagName].content_type || bemto_tag_metadata[tagName].type || result;
+    }
+    return result;
+  }
+
+  var bemto_tag_metadata = {
+    'hr': {
+      'type': 'self_closing'
+    },
+    'br': {
+      'type': 'self_closing'
+    },
+    'wbr': {
+      'type': 'self_closing'
+    },
+    'source': {
+      'type': 'self_closing'
+    },
+    'img': {
+      'type': 'self_closing'
+    },
+    'input': {
+      'type': 'self_closing'
+    },
+    'a': {
+      'type': 'inline'
+    },
+    'abbr': {
+      'type': 'inline'
+    },
+    'acronym': {
+      'type': 'inline'
+    },
+    'b': {
+      'type': 'inline'
+    },
+    'code': {
+      'type': 'inline'
+    },
+    'em': {
+      'type': 'inline'
+    },
+    'font': {
+      'type': 'inline'
+    },
+    'i': {
+      'type': 'inline'
+    },
+    'ins': {
+      'type': 'inline'
+    },
+    'kbd': {
+      'type': 'inline'
+    },
+    'map': {
+      'type': 'inline'
+    },
+    'pre': {
+      'type': 'inline'
+    },
+    'samp': {
+      'type': 'inline'
+    },
+    'small': {
+      'type': 'inline'
+    },
+    'span': {
+      'type': 'inline'
+    },
+    'strong': {
+      'type': 'inline'
+    },
+    'sub': {
+      'type': 'inline'
+    },
+    'sup': {
+      'type': 'inline'
+    },
+    'textarea': {
+      'type': 'inline'
+    },
+    'time': {
+      'type': 'inline'
+    },
+    'label': {
+      'content_type': 'inline'
+    },
+    'p': {
+      'content_type': 'inline'
+    },
+    'h1': {
+      'content_type': 'inline'
+    },
+    'h2': {
+      'content_type': 'inline'
+    },
+    'h3': {
+      'content_type': 'inline'
+    },
+    'h4': {
+      'content_type': 'inline'
+    },
+    'h5': {
+      'content_type': 'inline'
+    },
+    'h6': {
+      'content_type': 'inline'
+    },
+    'ul': {
+      'content_type': 'list'
+    },
+    'ol': {
+      'content_type': 'list'
+    },
+    'select': {
+      'content_type': 'optionlist'
+    },
+    'datalist': {
+      'content_type': 'optionlist'
+    }
+  }
+
+
+-
+  var default_bemto_settings = {
+    'prefix': '',
+    'element': '__',
+    'modifier': '_',
+    'default_tag': 'div',
+    'nosrc_substitute': true,
+    'flat_elements': true,
+    'class_delimiter': ''
+  }
+
+  var bemto_output_settings = ['element', 'modifier'];
+
+  var bemto_settings = default_bemto_settings;
+
+  var get_bemto_settings = function() {
+    var settings = clone(bemto_settings);
+    if (bemto_settings_prefix      !== undefined) { settings['prefix']      = bemto_settings_prefix;      }
+    if (bemto_settings_element     !== undefined) { settings['element']     = bemto_settings_element;     }
+    if (bemto_settings_modifier    !== undefined) { settings['modifier']    = bemto_settings_modifier;    }
+    if (bemto_settings_default_tag !== undefined) { settings['default_tag'] = bemto_settings_default_tag; }
+
+    for (var i = 0; i < bemto_output_settings.length; i++) {
+      var setting = bemto_output_settings[i];
+      if (settings['output_' + setting] === undefined) {
+        settings['output_' + setting] = settings[setting];
+      }
+    };
+
+    return settings;
+  }
+
+  var set_bemto_setting = function(name, value) {
+    bemto_settings[name] = value;
+
+    //- Resetting the old variable-type setting
+    if (name == 'prefix' && bemto_settings_prefix !== undefined) { bemto_settings_prefix = undefined; }
+    if (name == 'element' && bemto_settings_element !== undefined) { bemto_settings_element = undefined; }
+    if (name == 'modifier' && bemto_settings_modifier !== undefined) { bemto_settings_modifier = undefined; }
+    if (name == 'default_tag' && bemto_settings_default_tag !== undefined) { bemto_settings_default_tag = undefined; }
+  }
+
+  var set_bemto_settings = function(settings) {
+    for (var name in settings) {
+      if (settings.hasOwnProperty(name)) {
+        set_bemto_setting(name, settings[name]);
+      }
+    }
+  }
+
+mixin bemto_scope(settings)
+  - var old_bemto_settings = clone(bemto_settings)
+  - set_bemto_settings(settings)
+  block
+  - set_bemto_settings(old_bemto_settings)
+
+
 include bemto_tag.pug
 include bemto.pug
